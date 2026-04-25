@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0c0c0b">
+<title>Zwilling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg:         #0c0c0b;
+  --surface:    #141413;
+  --surface2:   #1a1a18;
+  --border:     #252522;
+  --border2:    #2e2e2a;
+  --text:       #e6e2d8;
+  --text-dim:   #7a756a;
+  --text-muted: #38352f;
+  --accent:     #c8a46a;
+  --accent-dim: #6e5a38;
+  --accent-bg:  #1c1710;
+  --red:        #7a3535;
+  --red-text:   #c07070;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SCREENS ─── */
+.screen {
+  display: none;
+  height: 100dvh;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* ─── SETUP SCREEN ─── */
+#setup {
+  justify-content: center;
+  align-items: center;
+  padding: 48px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle grain texture */
+#setup::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.setup-inner {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  position: relative;
+  z-index: 1;
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wordmark-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.wordmark-text em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.wordmark-sub {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.setup-desc {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.8;
+  border-left: 1px solid var(--border2);
+  padding-left: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+input[type="password"],
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  padding: 13px 15px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--accent-dim);
+}
+
+::placeholder { color: var(--text-muted); }
+
+.error-msg {
+  font-size: 11px;
+  color: var(--red-text);
+  display: none;
+  padding: 10px 12px;
+  background: rgba(122,53,53,0.1);
+  border: 1px solid var(--red);
+  border-radius: 3px;
+}
+
+.error-msg.visible { display: block; }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #0c0c0b;
+  border: none;
+  border-radius: 3px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  position: relative;
+}
+
+.btn:active { opacity: 0.75; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+}
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red-text);
+}
+
+.setup-footer {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* ─── CHAT SCREEN ─── */
+#chat { background: var(--bg); }
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.header-twin {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: dotpulse 2.5s ease-in-out infinite;
+}
+
+.pulse-dot.empty {
+  background: var(--text-muted);
+  animation: none;
+}
+
+@keyframes dotpulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.twin-name-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.header-wordmark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.header-wordmark em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.hamburger i {
+  display: block;
+  height: 1px;
+  background: var(--text-dim);
+  transition: all 0.2s;
+}
+
+.hamburger i:nth-child(1) { width: 20px; }
+.hamburger i:nth-child(2) { width: 13px; }
+.hamburger i:nth-child(3) { width: 20px; }
+
+/* ─── MESSAGES ─── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: risein 0.28s ease forwards;
+  opacity: 0;
+}
+
+@keyframes risein {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 3px;
+}
+
+.msg.user { align-items: flex-end; }
+.msg.user .msg-label { color: var(--accent-dim); }
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg.user .bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  max-width: 88%;
+}
+
+.msg.assistant .bubble {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.75;
+  max-width: 96%;
+  padding-left: 0;
+  border-left: 1px solid var(--border2);
+  padding-left: 16px;
+}
+
+.msg.note .bubble {
+  background: var(--accent-bg);
+  border: 1px dashed var(--accent-dim);
+  color: var(--text-dim);
+  font-size: 12px;
+  max-width: 100%;
+  text-align: center;
+  border-radius: 3px;
+}
+
+/* thinking */
+.thinking-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: risein 0.28s ease forwards;
+  opacity: 0;
+}
+
+.thinking-dots {
+  display: flex;
+  gap: 5px;
+  padding: 14px 16px;
+  border-left: 1px solid var(--border2);
+  margin-left: 0;
+}
+
+.thinking-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  animation: blink 1.3s ease-in-out infinite;
+}
+
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.15; transform: scale(0.7); }
+  40%           { opacity: 1;    transform: scale(1); }
+}
+
+/* ─── UPDATE BANNER ─── */
+.update-banner {
+  margin: 0 16px 10px;
+  padding: 14px 16px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-dim);
+  border-radius: 4px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.update-banner.show { display: flex; }
+
+.update-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.update-text strong { color: var(--accent); font-weight: 400; }
+
+.update-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.update-btns button {
+  flex: 1;
+  padding: 9px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  transition: opacity 0.15s;
+}
+
+.update-btns button:active { opacity: 0.7; }
+
+.u-accept {
+  background: var(--accent);
+  border: none;
+  color: #0c0c0b;
+}
+
+.u-dismiss {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+}
+
+/* ─── INPUT ─── */
+.input-wrap {
+  padding: 10px 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+#userInput {
+  flex: 1;
+  resize: none;
+  border-radius: 4px;
+  min-height: 46px;
+  max-height: 130px;
+  font-size: 14px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  overflow-y: auto;
+}
+
+.send-btn {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+
+.send-btn:active { opacity: 0.7; }
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.send-btn svg { width: 18px; height: 18px; fill: #0c0c0b; }
+
+/* ─── DRAWER ─── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 100;
+  display: none;
+  backdrop-filter: blur(3px);
+}
+
+.overlay.open { display: block; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 300px;
+  height: 100dvh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 101;
+  transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.drawer.open { right: 0; }
+
+.drawer-head {
+  padding: 28px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.drawer-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.drawer-version {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.drawer-sec {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawer-sec-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.twin-preview-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 12px 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+  max-height: 140px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.65;
+}
+
+.twin-empty-hint {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 11px;
+}
+
+.drawer-sec button { font-size: 11px; padding: 11px; }
+
+/* ─── MODAL ─── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  backdrop-filter: blur(4px);
+}
+
+.modal-bg.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px 10px 0 0;
+  padding: 24px 20px 36px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--text);
+}
+
+.modal-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.modal textarea {
+  min-height: 180px;
+  font-size: 12px;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button { flex: 1; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+  SCREEN: SETUP
+═══════════════════════════════════════════ -->
+<div id="setup" class="screen">
+  <div class="setup-inner">
+
+    <div class="wordmark">
+      <div class="wordmark-text">Zwil<em>l</em>ing</div>
+      <div class="wordmark-sub">Dein digitales Selbst</div>
+    </div>
+
+    <div class="setup-desc">
+      Sprich wie mit einem Kumpel oder deinem Zukunfts-Ich.<br>
+      Das System lernt dich kennen – und wird mit der Zeit genauer.
+    </div>
+
+    <div class="field">
+      <div class="field-label">Google AI Studio API-Key</div>
+      <input type="password" id="apiKeyInput" placeholder="AIza..." autocomplete="off" spellcheck="false">
+      <div class="error-msg" id="setupError">Verbindung fehlgeschlagen. Bitte Key prüfen.</div>
+    </div>
+
+    <button class="btn" id="setupBtn" onclick="handleSetup()">Weiter →</button>
+
+    <div class="setup-footer">
+      Der Key wird ausschließlich lokal gespeichert.<br>
+      Kein Server. Keine Weitergabe. Volle Kontrolle.
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  SCREEN: CHAT
+═══════════════════════════════════════════ -->
+<div id="chat" class="screen">
+
+  <div class="chat-header">
+    <div class="header-twin">
+      <div class="pulse-dot" id="statusDot"></div>
+      <span class="twin-name-label" id="twinLabel">Zwilling leer</span>
+    </div>
+    <div class="header-wordmark">Zwil<em>l</em>ing</div>
+    <button class="hamburger" onclick="openDrawer()" aria-label="Menü">
+      <i></i><i></i><i></i>
+    </button>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="update-banner" id="updateBanner">
+    <div class="update-text">
+      <strong>Zwilling-Update bereit.</strong><br>
+      <span id="updateSummary"></span>
+    </div>
+    <div class="update-btns">
+      <button class="u-accept" onclick="acceptUpdate()">Übernehmen</button>
+      <button class="u-dismiss" onclick="dismissUpdate()">Später</button>
+    </div>
+  </div>
+
+  <div class="input-wrap">
+    <div class="input-row">
+      <textarea id="userInput" placeholder="Schreib etwas…" rows="1"
+        oninput="autoResize(this)"
+        onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Senden">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+
+  <div class="drawer-head">
+    <div class="drawer-title">Zwilling</div>
+    <div class="drawer-version" id="drawerVersion">Version — leer</div>
+  </div>
+
+  <div class="drawer-sec">
+    <div class="drawer-sec-label">Zwilling-Inhalt</div>
+    <div class="twin-preview-box" id="twinPreview">
+      <span class="twin-empty-hint">Noch keine Daten. Starte ein Gespräch.</span>
+    </div>
+  </div>
+
+  <div class="drawer-sec">
+    <div class="drawer-sec-label">Zwilling verwalten</div>
+    <button class="btn btn-ghost" onclick="openEditModal()">Zwilling bearbeiten</button>
+  </div>
+
+  <div class="drawer-sec">
+    <div class="drawer-sec-label">Backup</div>
+    <div style="font-size:10px; color:var(--text-muted); line-height:1.6; margin-bottom:4px;">
+      Zwilling lebt intern in der App. Export nur nötig wenn du wechselst oder sichern willst.
+    </div>
+    <button class="btn btn-ghost" onclick="downloadTwin()">Als Datei exportieren</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('uploadInput').click()">Backup importieren</button>
+    <input type="file" id="uploadInput" accept=".json,.txt,.md" style="display:none" onchange="uploadTwin(event)">
+  </div>
+
+  <div class="drawer-sec">
+    <div class="drawer-sec-label">Chat</div>
+    <button class="btn btn-ghost" onclick="clearChat()">Gespräch löschen</button>
+  </div>
+
+  <div class="drawer-sec">
+    <div class="drawer-sec-label">Einstellungen</div>
+    <button class="btn btn-ghost" onclick="openApiModal()">API-Key ändern</button>
+    <button class="btn btn-danger" onclick="resetAll()">Alles zurücksetzen</button>
+  </div>
+
+</div>
+
+
+<!-- MODAL: EDIT TWIN -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-title">Zwilling bearbeiten</div>
+    <div class="modal-desc">Hier kannst du den Zwilling direkt anpassen. Änderungen werden sofort gespeichert.</div>
+    <textarea id="editTwinArea" placeholder="Zwilling-Inhalt…"></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Abbrechen</button>
+      <button class="btn" onclick="saveEditedTwin()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: API KEY -->
+<div class="modal-bg" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">API-Key ändern</div>
+    <div class="modal-desc">Neuen Google AI Studio API-Key eingeben.</div>
+    <input type="password" id="newApiKey" placeholder="AIza..." autocomplete="off">
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeApiModal()">Abbrechen</button>
+      <button class="btn" onclick="saveNewApiKey()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const STATE = {
+  apiKey: '',
+  twin: '',          // current twin content (plain text / markdown)
+  twinVersion: 0,
+  messages: [],      // {role, content}
+  pendingUpdate: null,
+  isLoading: false,
+  msgCount: 0        // messages sent this session
+};
+
+const STORAGE = {
+  API_KEY:      'zw_api',
+  TWIN:         'zw_twin',
+  TWIN_VERSION: 'zw_twin_v',
+};
+
+// ── System prompt: onboarding (empty twin) ──
+const SYSTEM_ONBOARDING = `Du bist der Zwilling – ein personalisierter digitaler Gesprächspartner.
+
+Der Zwilling dieses Nutzers ist noch leer. Du weißt noch nichts über ihn.
+
+Deine Aufgabe jetzt:
+- Führe ein natürliches, warmes Gespräch.
+- Stell eine oder zwei einfache Fragen um den Nutzer kennenzulernen (Name, Alter, was ihn gerade beschäftigt).
+- Merke dir alles was er erzählt.
+- Nach 3–4 Nachrichten: fasse das Gelernte kurz zusammen und frage ob du es als ersten Zwilling-Stand speichern sollst.
+- Wenn ja, gib am Ende deiner Antwort exakt diesen Block aus:
+
+[TWIN_UPDATE_START]
+Name: [wenn genannt]
+Alter: [wenn genannt]
+Beruf: [wenn genannt]
+Aktuelles Thema: [was ihn beschäftigt]
+Erste Beobachtung: [eine kurze ehrliche Einschätzung]
+[TWIN_UPDATE_END]
+
+Ton: kurz, persönlich, dialogisch. Kein Coaching-Sprech. Kein Analyse-Block. Wie ein vertrauter Gesprächspartner.`;
+
+// ── System prompt: active twin ──
+function buildSystemPrompt() {
+  return `Du bist der Zwilling – ein personalisierter digitaler Gesprächspartner.
+
+ZWILLING-STAND (Version ${STATE.twinVersion}):
+${STATE.twin}
+
+---
+Antworte auf Basis dessen was du über den Nutzer weißt.
+Ton: kurz, persönlich, dialogisch. Kein Analyse-Block.
+
+Wenn du im Gespräch etwas Neues erfährst das den Zwilling ergänzen sollte (neue Information, Korrektur, wichtige Beobachtung), dann füge am Ende deiner Antwort diesen Block ein:
+
+[TWIN_UPDATE_START]
+[aktualisierter vollständiger Zwilling-Inhalt]
+[TWIN_UPDATE_END]
+
+Nur wenn wirklich etwas Neues dazukommt. Nicht nach jeder Nachricht.`;
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const key = localStorage.getItem(STORAGE.API_KEY);
+  if (key) {
+    STATE.apiKey = key;
+    STATE.twin = localStorage.getItem(STORAGE.TWIN) || '';
+    STATE.twinVersion = parseInt(localStorage.getItem(STORAGE.TWIN_VERSION) || '0');
+    showChat();
+  } else {
+    showSetup();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════
+function showSetup() {
+  document.getElementById('setup').classList.add('active');
+  document.getElementById('chat').classList.remove('active');
+}
+
+function handleSetup() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (key.length < 10) {
+    showError('setupError', 'Bitte gültigen API-Key eingeben.');
+    return;
+  }
+  // Key wird direkt gespeichert – Test erfolgt beim ersten Gespräch
+  STATE.apiKey = key;
+  localStorage.setItem(STORAGE.API_KEY, key);
+  showChat();
+}
+
+async function validateKey(key) {
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: 'Hi' }] }],
+        generationConfig: { maxOutputTokens: 5 }
+      })
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════
+//  CHAT SCREEN
+// ═══════════════════════════════════════════════════
+function showChat() {
+  document.getElementById('setup').classList.remove('active');
+  document.getElementById('chat').classList.add('active');
+  updateTwinUI();
+
+  if (STATE.messages.length === 0) {
+    // opening message from twin
+    const greeting = STATE.twin
+      ? `Ich bin wieder da.`
+      : `Hallo. Ich bin dein Zwilling – noch ein leeres Blatt.\n\nWie heißt du? Und was beschäftigt dich gerade?`;
+    addMessage('assistant', greeting);
+  }
+}
+
+function updateTwinUI() {
+  const hasTwin = STATE.twin.trim().length > 0;
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('twinLabel');
+  const preview = document.getElementById('twinPreview');
+  const version = document.getElementById('drawerVersion');
+
+  dot.className = 'pulse-dot' + (hasTwin ? '' : ' empty');
+  label.textContent = hasTwin ? `Version ${STATE.twinVersion}` : 'Zwilling leer';
+  version.textContent = hasTwin ? `Version ${STATE.twinVersion}` : 'Version — leer';
+
+  if (hasTwin) {
+    preview.innerHTML = '';
+    preview.textContent = STATE.twin.substring(0, 400) + (STATE.twin.length > 400 ? '…' : '');
+  } else {
+    preview.innerHTML = '<span class="twin-empty-hint">Noch keine Daten. Starte ein Gespräch.</span>';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  MESSAGING
+// ═══════════════════════════════════════════════════
+async function sendMessage() {
+  if (STATE.isLoading) return;
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = '';
+  STATE.isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  addMessage('user', text);
+  STATE.messages.push({ role: 'user', content: text });
+  STATE.msgCount++;
+
+  const thinkId = addThinking();
+
+  try {
+    const sysPrompt = STATE.twin ? buildSystemPrompt() : SYSTEM_ONBOARDING;
+    const response = await callClaude(sysPrompt, STATE.messages);
+    removeThinking(thinkId);
+
+    const { clean, updateContent } = parseResponse(response);
+    addMessage('assistant', clean);
+    STATE.messages.push({ role: 'assistant', content: clean });
+
+    if (updateContent) {
+      STATE.pendingUpdate = updateContent;
+      showUpdateBanner(updateContent);
+    }
+  } catch (e) {
+    removeThinking(thinkId);
+    addMessage('note', '⚠ Verbindungsfehler. Bitte erneut versuchen.');
+    console.error(e);
+  }
+
+  STATE.isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+async function callClaude(system, messages) {
+  // Convert messages to Gemini format
+  const geminiMessages = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${STATE.apiKey}`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents: geminiMessages,
+      generationConfig: { maxOutputTokens: 1024 }
+    })
+  });
+
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(`API ${r.status}: ${err?.error?.message || ''}`);
+  }
+  const data = await r.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+function parseResponse(text) {
+  const startTag = '[TWIN_UPDATE_START]';
+  const endTag = '[TWIN_UPDATE_END]';
+  const s = text.indexOf(startTag);
+  const e = text.indexOf(endTag);
+
+  if (s !== -1 && e !== -1) {
+    const updateContent = text.slice(s + startTag.length, e).trim();
+    const clean = text.slice(0, s).trim();
+    return { clean, updateContent };
+  }
+  return { clean: text, updateContent: null };
+}
+
+// ═══════════════════════════════════════════════════
+//  DOM HELPERS
+// ═══════════════════════════════════════════════════
+function addMessage(role, content) {
+  const wrap = document.getElementById('messages');
+
+  const msg = document.createElement('div');
+  msg.className = `msg ${role}`;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'Du' : role === 'assistant' ? 'Zwilling' : '';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+
+  if (role !== 'note') msg.appendChild(label);
+  msg.appendChild(bubble);
+  wrap.appendChild(msg);
+  wrap.scrollTop = wrap.scrollHeight;
+  return msg;
+}
+
+function addThinking() {
+  const wrap = document.getElementById('messages');
+  const id = 'think_' + Date.now();
+
+  const div = document.createElement('div');
+  div.className = 'thinking-wrap';
+  div.id = id;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = 'Zwilling';
+
+  const dots = document.createElement('div');
+  dots.className = 'thinking-dots';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+
+  div.appendChild(label);
+  div.appendChild(dots);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return id;
+}
+
+function removeThinking(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  TWIN UPDATE
+// ═══════════════════════════════════════════════════
+function showUpdateBanner(content) {
+  const preview = content.length > 80 ? content.substring(0, 80) + '…' : content;
+  document.getElementById('updateSummary').textContent =
+    'Neue Informationen erkannt. Zwilling wird aktualisiert.';
+  document.getElementById('updateBanner').classList.add('show');
+}
+
+function acceptUpdate() {
+  if (!STATE.pendingUpdate) return;
+  STATE.twin = STATE.pendingUpdate;
+  STATE.twinVersion++;
+  STATE.pendingUpdate = null;
+
+  localStorage.setItem(STORAGE.TWIN, STATE.twin);
+  localStorage.setItem(STORAGE.TWIN_VERSION, STATE.twinVersion);
+
+  document.getElementById('updateBanner').classList.remove('show');
+  updateTwinUI();
+  addMessage('note', `✓ Zwilling aktualisiert (Version ${STATE.twinVersion})`);
+}
+
+function dismissUpdate() {
+  STATE.pendingUpdate = null;
+  document.getElementById('updateBanner').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════
+//  DRAWER
+// ═══════════════════════════════════════════════════
+function openDrawer() {
+  updateTwinUI();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════
+//  EDIT MODAL
+// ═══════════════════════════════════════════════════
+function openEditModal() {
+  closeDrawer();
+  document.getElementById('editTwinArea').value = STATE.twin;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
+function saveEditedTwin() {
+  const val = document.getElementById('editTwinArea').value.trim();
+  STATE.twin = val;
+  if (val) STATE.twinVersion++;
+  localStorage.setItem(STORAGE.TWIN, STATE.twin);
+  localStorage.setItem(STORAGE.TWIN_VERSION, STATE.twinVersion);
+  closeEditModal();
+  updateTwinUI();
+  addMessage('note', `✓ Zwilling manuell gespeichert (Version ${STATE.twinVersion})`);
+}
+
+// ═══════════════════════════════════════════════════
+//  API MODAL
+// ═══════════════════════════════════════════════════
+function openApiModal() {
+  closeDrawer();
+  document.getElementById('newApiKey').value = '';
+  document.getElementById('apiModal').classList.add('open');
+}
+
+function closeApiModal() {
+  document.getElementById('apiModal').classList.remove('open');
+}
+
+function saveNewApiKey() {
+  const key = document.getElementById('newApiKey').value.trim();
+  if (key.length < 10) return;
+  STATE.apiKey = key;
+  localStorage.setItem(STORAGE.API_KEY, key);
+  closeApiModal();
+  addMessage('note', '✓ API-Key gespeichert.');
+}
+
+// ═══════════════════════════════════════════════════
+//  DOWNLOAD / UPLOAD
+// ═══════════════════════════════════════════════════
+function downloadTwin() {
+  if (!STATE.twin) {
+    alert('Zwilling ist noch leer – nichts zu exportieren.');
+    return;
+  }
+  const exportData = {
+    version: STATE.twinVersion,
+    exportedAt: new Date().toISOString(),
+    content: STATE.twin
+  };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json; charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `zwilling-backup-v${STATE.twinVersion}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  closeDrawer();
+}
+
+function uploadTwin(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let content = e.target.result.trim();
+    // handle JSON backup format
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.content) {
+        content = parsed.content;
+        STATE.twinVersion = parsed.version || STATE.twinVersion;
+      }
+    } catch { /* plain text, use as-is */ }
+
+    STATE.twin = content;
+    STATE.twinVersion++;
+    localStorage.setItem(STORAGE.TWIN, STATE.twin);
+    localStorage.setItem(STORAGE.TWIN_VERSION, STATE.twinVersion);
+    updateTwinUI();
+    closeDrawer();
+    addMessage('note', `✓ Backup importiert (Version ${STATE.twinVersion})`);
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════
+//  CLEAR / RESET
+// ═══════════════════════════════════════════════════
+function clearChat() {
+  if (!confirm('Gespräch löschen? Der Zwilling bleibt erhalten.')) return;
+  STATE.messages = [];
+  STATE.msgCount = 0;
+  document.getElementById('messages').innerHTML = '';
+  closeDrawer();
+  const greeting = STATE.twin
+    ? `Neues Gespräch. Womit kann ich dir helfen?`
+    : `Hallo. Ich bin dein Zwilling – noch ein leeres Blatt.\n\nWie heißt du?`;
+  addMessage('assistant', greeting);
+}
+
+function resetAll() {
+  if (!confirm('Alles zurücksetzen? Twin und Key werden gelöscht.')) return;
+  localStorage.clear();
+  location.reload();
+}
+</script>
+</body>
+</html>
